@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,500&map;subset=cyrillic">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    ЁмаЁ МаМа ЗвОнИт<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         *{
             box-sizing: border-box;
@@ -25,11 +25,22 @@
             margin: auto;
             padding: 40px;   
         }
-        input{
+        .field{
+            margin: 1rem 0 ;
+
+        }
+        textarea{
+            overflow: hidden;
+            resize: none;
+            height: 3.5rem;
+            padding-left: 0;
+            padding-top: 0;
+        }
+        input, textarea{
             display: block;
             width: 100%;
             margin: 0.5rem 0;
-            padding: 0.4rem 0;
+            padding: 0 0 0.4rem ;
             outline: none;
             font-size: 1rem;
             letter-spacing: 0.75px;
@@ -38,6 +49,8 @@
             border-radius: 0;
             transition: 1s ease;
         }
+
+
         input:focus{
             /* hex code */
             border-color: #ffbf02;
@@ -84,13 +97,23 @@
             transform: translateX(-12.5%) translateY(0.2rem) scale(0.75);       
         }
 
+
+
+
+
+
+
+        input:-webkit-autofill{
+            -webkit-box-shadow: 0 0 0px 1000px red inset;
+        }
+
     </style>
     <title>Форма обратной связи</title>
 </head>
 <body>
         <div class="form-container">
-            <h3 action="" id="form">Форма обратной связи</h3>
-            <form action="https://formspree.io/f/mvodorzn" name="name" method="POST">
+            <h3 action="" >Форма обратной связи</h3>
+            <form action="" id="form" name="name" method="POST">
                 <div class="field">
                     <label for="name" >Имя и фамилия</label>
                     <input type="text" id="name">
@@ -100,7 +123,11 @@
                     <label for="email">Адрес эл.почты</label>
                     <input type="email" id="email" name="_replyto">
                 </div>
-               
+                
+                <div class="field">
+                    <label for="message">Сообщение</label>
+                    <textarea name="message" id ="message" cols="20" rows="5" wrap="hard"></textarea>
+                </div>
                 <input type="submit" id="submit">
             
             </form>
@@ -110,19 +137,39 @@
        <script>
            //var - variable
            var inputs = [].slice.call(document.querySelectorAll("input"));
-          
 
-
-           inputs.forEach(function(input){
+                var textarea = document.getElementById("message");
+                textarea.addEventListener("focusin", focusInInputHandler);
+                textarea.addEventListener("focusout",focusOutInputHandler);
+                if(textarea.value != "") {
+                    focusInInputHandler.call(textarea);
+                }
+         
+         
+         
+         
+         
+                inputs.forEach(function(input){
                if(input.getAttribute("type") != "submit"){
                    if(input.value !==""){
-                       var label=document.querySelector('label[for"' + input.id +'"]');
-                       label.classList.add("focusoud",focusOutInputHandler);
+                    //    var label=document.querySelector('label[for"' + input.id +'"]');
+                    //    label.classList.add("focusoud",focusOutInputHandler);
+                    focusInInputHandler.call(input);
                    }
                    input.addEventListener("focusin", focusInInputHandler);
                    input.addEventListener("focusout", focusOutInputHandler);
                }
            });
+
+
+                function encode(data){
+                var encodedData = [];
+                for(var key in data){            
+                encodedData.push(encodeURIComponent(key)+ "=" + encodeURIComponent(data[key]));
+                }
+                return encodedData.join("&");
+            }
+
 
 
 
@@ -141,6 +188,35 @@
              .log(label);
                 label.classList.remove("focused");
            }
+
+           var form = document.getElementById("form");
+
+           form.addEventListener("submit", function(e){
+             //prevent - избегать, default - по умолчанию 
+            e.preventDefault();
+
+
+            var data = {
+                "name": form.elements[0].value,
+                "_replyto": form.elements[1].value,
+                "massage": form.elements[2].value,
+            }
+            //request - запрос
+            request = new  XMLHttpRequest();
+            request.open("POST", "https://formspree.io/f/mvodorzn", true)
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            request.send(encode(data));
+            form.reset();
+
+            input.forEach(function(input){
+                focusOutInputHandler.call(input);
+            });
+            focusOutInputHandler.call(textarea);
+        });
+
+
+
+
        </script>
 </body>
 </html>
